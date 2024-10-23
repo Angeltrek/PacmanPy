@@ -14,6 +14,7 @@ from turtle import Turtle, bgcolor, clear, up, goto, dot, update, \
     ontimer, setup, hideturtle, tracer, listen, onkey, done
 
 from freegames import floor, vector
+from collections import deque
 
 state = {'score': 0}
 path = Turtle(visible=False)
@@ -53,6 +54,53 @@ tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]
 # fmt: on
+
+
+def bfs(start, goal):
+    """Encuentra el camino más corto del fantasma
+    hacia Pacman usando BFS."""
+    queue = deque([tuple(start)])
+    visited = set([tuple(start)])
+    parents = {}
+    directions = [vector(20, 0), vector(-20, 0),
+                  vector(0, 20), vector(0, -20)]
+
+    while queue:
+        current = queue.popleft()
+
+        if current == tuple(goal):  # Comparamos con tupla
+            path = []
+            while current in parents:
+                path.append(vector(*current))  # Volvemos a convertir a vector
+                current = parents[current]
+            path.reverse()
+            return path
+
+        for direction in directions:
+            neighbor = (current[0] + direction.x, current[1] + direction.y)
+            if (valid(vector(neighbor[0], neighbor[1]))
+                    and neighbor not in visited):
+                visited.add(neighbor)
+                queue.append(neighbor)
+                parents[neighbor] = current
+
+    return []  # No se encontró un camino
+
+
+def move_ghost_smart(ghost, course):
+    """Mueve el fantasma de manera inteligente hacia Pacman."""
+    path_to_pacman = bfs(vector(int(ghost.x), int(ghost.y)),
+                         vector(int(pacman.x), int(pacman.y)))
+    if path_to_pacman:
+        next_step = path_to_pacman[0]
+        course.x = next_step.x - ghost.x
+        course.y = next_step.y - ghost.y
+    else:
+        options = [vector(20, 0), vector(-20, 0),
+                   vector(0, 20), vector(0, -20)]
+        plan = choice(options)
+        course.x = plan.x
+        course.y = plan.y
 
 
 def square(x, y):
@@ -135,6 +183,8 @@ def move():
     dot(20, 'yellow')
 
     for point, course in ghosts:
+        move_ghost_smart(point, course)
+
         if valid(point + course):
             point.move(course)
         else:
