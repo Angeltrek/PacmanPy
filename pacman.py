@@ -22,9 +22,12 @@ aim = vector(5, 0)
 pacman = vector(-40, -80)
 ghosts = [
     [vector(-180, 160), vector(5, 0)],
+    [vector(-180, 100), vector(5, 0)],
     [vector(-180, -160), vector(0, 5)],
     [vector(100, 160), vector(0, -5)],
+    [vector(100, 100), vector(0, -5)],
     [vector(100, -160), vector(-5, 0)],
+    [vector(100, -120), vector(-5, 0)],
 ]
 # fmt: off
 tiles = [
